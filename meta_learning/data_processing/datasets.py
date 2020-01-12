@@ -7,10 +7,11 @@ from tqdm import tqdm
 import pandas as pd
 import numpy as np
 import os
+import zipfile
 
 
 class MetaLearningDataset(Dataset):
-    def __init__(self, subset, data_path):
+    def __init__(self, subset, data_path, unzip: bool = False):
         """Dataset class representing Omniglot dataset
         # Arguments:
             subset: Whether the dataset represents the background or evaluation set
@@ -19,6 +20,8 @@ class MetaLearningDataset(Dataset):
             raise(ValueError, 'subset must be one of (background, evaluation)')
         self.subset = subset
         self.data_path = data_path
+        if unzip:
+            self.unzip_data(self.data_path)
 
         self.df = pd.DataFrame(self.index_subset(self.subset, self.data_path))
 
@@ -39,6 +42,13 @@ class MetaLearningDataset(Dataset):
 
     def num_classes(self):
         return len(self.df['class_name'].unique())
+
+    @staticmethod
+    def unzip_data(data_path):
+        for dataset in ['images_background.zip', 'images_evaluation.zip']:
+            print(f'start unzipping {dataset}')
+            with zipfile.ZipFile(os.path.join(data_path, dataset)) as zip_ref:
+                zip_ref.extractall(data_path)
 
     @staticmethod
     def index_subset(subset, data_path):
@@ -78,7 +88,7 @@ class MetaLearningDataset(Dataset):
 
 
 class OmniglotDataset(MetaLearningDataset):
-    def __init__(self, subset, data_path, transform=None):
+    def __init__(self, subset, data_path, transform=None, unzip=False):
         """Dataset class representing Omniglot dataset
         # Arguments:
             subset: Whether the dataset represents the background or evaluation set
@@ -86,7 +96,7 @@ class OmniglotDataset(MetaLearningDataset):
         self.subset = subset
         self.data_path = data_path
         self.transform = transform
-        super(OmniglotDataset, self).__init__(self.subset, self.data_path)
+        super(OmniglotDataset, self).__init__(self.subset, self.data_path, unzip)
         
     def __getitem__(self, item):
         instance = io.imread(self.datasetid_to_filepath[item])

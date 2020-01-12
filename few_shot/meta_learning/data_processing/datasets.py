@@ -45,8 +45,10 @@ class MetaLearningDataset(Dataset):
 
     @staticmethod
     def unzip_data(subset, data_path):
-        dataset = f'/images_{subset}.zip'
+        dataset = f'images_{subset}.zip'
         print(f'start unzipping {dataset}')
+        print(os.path.join(data_path, dataset))
+        print(os.listdir(data_path))
         with zipfile.ZipFile(os.path.join(data_path, dataset)) as zip_ref:
             zip_ref.extractall(data_path)
 

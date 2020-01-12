@@ -23,7 +23,7 @@ USE_CUDA = torch.cuda.is_available()
 device = torch.device("cuda" if USE_CUDA else "cpu")
 
 def Initialise_training(args):
-    background = OmniglotDataset('background', args.data_dir, unzip=True)
+    background = OmniglotDataset('background', args.data_train, unzip=True)
     background_taskloader = DataLoader(
         background,
         batch_sampler=NShotTaskSampler(
@@ -36,7 +36,7 @@ def Initialise_training(args):
         num_workers=4
     )
 
-    evaluation = OmniglotDataset('evaluation', args.data_dir, unzip=True)
+    evaluation = OmniglotDataset('evaluation', args.data_test, unzip=True)
     evaluation_taskloader = DataLoader(
         evaluation,
         batch_sampler=NShotTaskSampler(
@@ -114,7 +114,8 @@ if __name__ == '__main__':
     # parser.add_argument('--hosts', type=list, default=json.loads(os.environ['SM_HOSTS']))
     # parser.add_argument('--current-host', type=str, default=os.environ['SM_CURRENT_HOST'])
     # parser.add_argument('--model-dir', type=str, default=os.environ['SM_MODEL_DIR'])
-    parser.add_argument('--data-dir', type=str, default=os.environ['SM_CHANNEL_TRAINING'])
+    parser.add_argument('--data-train', type=str, default=os.environ['SM_CHANNEL_TRAINING'])
+    parser.add_argument('--data-test', type=str, default=os.environ['SM_CHANNEL_TEST'])
     # parser.add_argument('--num-gpus', type=int, default=os.environ['SM_NUM_GPUS'])
     
     # parser.add_argument('--data-dir', type=str)

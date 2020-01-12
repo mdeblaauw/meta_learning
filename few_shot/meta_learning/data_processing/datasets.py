@@ -21,7 +21,7 @@ class MetaLearningDataset(Dataset):
         self.subset = subset
         self.data_path = data_path
         if unzip:
-            self.unzip_data(self.data_path)
+            self.unzip_data(self.subset, self.data_path)
 
         self.df = pd.DataFrame(self.index_subset(self.subset, self.data_path))
 
@@ -44,11 +44,11 @@ class MetaLearningDataset(Dataset):
         return len(self.df['class_name'].unique())
 
     @staticmethod
-    def unzip_data(data_path):
-        for dataset in ['images_background.zip', 'images_evaluation.zip']:
-            print(f'start unzipping {dataset}')
-            with zipfile.ZipFile(os.path.join(data_path, dataset)) as zip_ref:
-                zip_ref.extractall(data_path)
+    def unzip_data(subset, data_path):
+        dataset = f'/images_{subset}/'
+        print(f'start unzipping {dataset}')
+        with zipfile.ZipFile(os.path.join(data_path, dataset)) as zip_ref:
+            zip_ref.extractall(data_path)
 
     @staticmethod
     def index_subset(subset, data_path):

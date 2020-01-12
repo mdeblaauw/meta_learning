@@ -8,8 +8,6 @@ from collections import OrderedDict, Iterable
 import numpy as np
 import torch
 
-#from style_transfer.utils import save_image
-
 
 class CallbackList(object):
     """
@@ -389,21 +387,3 @@ class SaveAsPytorch(Callback):
 
     def on_train_end(self, logs=None):
         torch.save(self.model.state_dict(), self.path)
-
-
-class SaveStyleTransferImage(Callback):
-    """Callback that saves generated images
-
-    Arguments:
-        path {string} -- Path + filename to save image
-        input_img {torch.Tensor} -- Image that should be saved
-    """
-
-    def __init__(self, path: str, input_img: torch.Tensor):
-        self.path = path
-        self.imageObject = input_img
-        super(SaveStyleTransferImage, self).__init__()
-
-    def on_train_end(self, logs=None):
-        img = self.imageObject.clone()
-        img = img.clamp(0, 1) * 255

@@ -14,9 +14,10 @@ import numpy as np
 from meta_learning.models.models import get_few_shot_encoder
 from meta_learning.train_iterators.protonet import *
 from meta_learning.core import *
-from meta_learning.datasets.datasets import OmniglotDataset
 from meta_learning.train import fit
 from meta_learning.callbacks import *
+from meta_learning.data_processing.samplers import *
+from meta_learning.data_processing.datasets import OmniglotDataset
 
 USE_CUDA = torch.cuda.is_available()
 device = torch.device("cuda" if USE_CUDA else "cpu")
@@ -56,7 +57,7 @@ parser.add_argument("--learning-rate", type=float, default=0.001,
 args = parser.parse_args()
 
 dataset_class = OmniglotDataset
-background = dataset_class('background')
+background = dataset_class('background', 'data/Omniglot')
 background_taskloader = DataLoader(
     background,
     batch_sampler=NShotTaskSampler(
@@ -69,7 +70,7 @@ background_taskloader = DataLoader(
     num_workers=4
 )
 
-evaluation = dataset_class('evaluation')
+evaluation = dataset_class('evaluation', 'data/Omniglot')
 evaluation_taskloader = DataLoader(
     evaluation,
     batch_sampler=NShotTaskSampler(

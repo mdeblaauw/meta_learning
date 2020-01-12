@@ -2,7 +2,8 @@ import torch
 from torch import nn
 import torch.nn.functional as F
 from copy import deepcopy
-from config import EPSILON
+
+EPSILON = 1e-8
 
 def pairwise_distances(x: torch.Tensor,
                        y: torch.Tensor,

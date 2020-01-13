@@ -1,4 +1,6 @@
 .DS_Store
 data/
+venv/
 .ipynb_checkpoints
 __pycache__/
+.vscode

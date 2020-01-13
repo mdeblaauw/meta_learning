@@ -44,17 +44,17 @@ class VerboseLogger(Callback):
                 for k in self.metrics:
                     if logs[k]:
                         #print(f'{k}:{logs[k]}')
-                        logger.info(f'{k}:{logs[k]}')
+                        logger.info(f'{k}: {logs[k]};')
 
     def on_epoch_end(self, epoch, logs=None):
         if self.params['verbose'] > 0:
             #print('Epoch:', epoch)
-            logger.info(f'Epoch: {epoch}')
+            logger.info(f'Epoch: {epoch};')
         if self.params['verbose'] == 1:
             for k in self.metrics:
                 if logs[k]:
                     #print(f'{k}:{logs[k]}')
-                    logger.info(f'{k}:{logs[k]}')
+                    logger.info(f'{k}: {logs[k]};')
 
     def on_train_begin(self, logs=None):
         self.metrics = [self.params['loss']] + self.params['metrics']

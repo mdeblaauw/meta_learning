@@ -1,4 +1,5 @@
 import argparse
+import os
 
 import torch
 from torch.optim import Optimizer
@@ -15,7 +16,7 @@ from meta_learning.models.models import get_few_shot_encoder
 from meta_learning.train_iterators.protonet import *
 from meta_learning.core import *
 from meta_learning.train import fit
-from meta_learning.callbacks import *
+import meta_learning.callbacks as cb
 from meta_learning.data_processing.samplers import *
 from meta_learning.data_processing.datasets import OmniglotDataset
 
@@ -23,7 +24,7 @@ USE_CUDA = torch.cuda.is_available()
 device = torch.device("cuda" if USE_CUDA else "cpu")
 
 def Initialise_training(args):
-    background = OmniglotDataset('background', args.data_train, unzip=True)
+    background = OmniglotDataset('background', args.data_train, unzip=False)
     background_taskloader = DataLoader(
         background,
         batch_sampler=NShotTaskSampler(
@@ -36,7 +37,7 @@ def Initialise_training(args):
         num_workers=4
     )
 
-    evaluation = OmniglotDataset('evaluation', args.data_test, unzip=True)
+    evaluation = OmniglotDataset('evaluation', args.data_test, unzip=False)
     evaluation_taskloader = DataLoader(
         evaluation,
         batch_sampler=NShotTaskSampler(
@@ -56,7 +57,7 @@ def Initialise_training(args):
     optimiser = Adam(model.parameters(), lr=args.learning_rate)
     loss_fn = torch.nn.NLLLoss()
 
-    callbacks = [VerboseLogger()]
+    callbacks = [cb.VerboseLogger()]
 
     fit(
         model,
@@ -118,7 +119,6 @@ if __name__ == '__main__':
     parser.add_argument('--data-test', type=str, default=os.environ.get('SM_CHANNEL_TEST'))
     # parser.add_argument('--num-gpus', type=int, default=os.environ['SM_NUM_GPUS'])
     
-    # parser.add_argument('--data-dir', type=str)
-
     args = parser.parse_args()
+    
     Initialise_training(args)

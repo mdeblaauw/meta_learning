@@ -4,7 +4,7 @@ from torch.nn import Module
 from torch.utils.data import DataLoader
 from typing import Callable, List, Union, Dict, Tuple
 
-from meta_learning.callbacks import CallbackList, Callback, MetricAggregator
+import meta_learning.callbacks as cb
 from meta_learning.metrics import *
 
 
@@ -74,7 +74,7 @@ def batch_metrics(
 def fit(model: Module, optimiser: Optimizer, loss_fn: Callable, epochs: int,
         dataloader: DataLoader, prepare_batch: Callable,
         metrics: List[Union[str, Callable]] = None,
-        callbacks: List[Callback] = None,
+        callbacks: List[cb.Callback] = None,
         verbose: int = 1, fit_function: Callable = gradient_step,
         fit_function_kwargs: dict = {}):
     """Function to abstract away training loop.
@@ -107,7 +107,7 @@ def fit(model: Module, optimiser: Optimizer, loss_fn: Callable, epochs: int,
     num_batches = len(dataloader)
     batch_size = dataloader.batch_size
 
-    callbacks = CallbackList([MetricAggregator()] + (callbacks or []))
+    callbacks = cb.CallbackList([cb.MetricAggregator()] + (callbacks or []))
     callbacks.set_model(model)
     callbacks.set_params({
         'num_batches': num_batches,

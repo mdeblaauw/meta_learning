@@ -2,6 +2,8 @@ import os
 import csv
 import json
 import io
+import logging
+import sys
 
 from typing import Tuple
 from collections import OrderedDict, Iterable
@@ -9,6 +11,10 @@ from .callback import Callback
 
 import numpy as np
 import torch
+
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.DEBUG)
+logger.addHandler(logging.StreamHandler(sys.stdout))
 
 
 class VerboseLogger(Callback):
@@ -29,22 +35,26 @@ class VerboseLogger(Callback):
         if self.params['verbose'] == 2:
             self.batch_iterations += 1
             if(self.batch_iterations % self.log_interval == 0):
-                print('Batch:', self.batch_iterations)
+                #print('Batch:', self.batch_iterations)
+                logger.info(f'Batch: {self.batch_iterations}')
 
     def on_batch_end(self, batch, logs=None):
         if self.params['verbose'] == 2:
             if(self.batch_iterations % self.log_interval == 0):
                 for k in self.metrics:
                     if logs[k]:
-                        print(f'{k}:{logs[k]}')
+                        #print(f'{k}:{logs[k]}')
+                        logger.info(f'{k}:{logs[k]}')
 
     def on_epoch_end(self, epoch, logs=None):
         if self.params['verbose'] > 0:
-            print('Epoch:', epoch)
+            #print('Epoch:', epoch)
+            logger.info(f'Epoch: {epoch}')
         if self.params['verbose'] == 1:
             for k in self.metrics:
                 if logs[k]:
-                    print(f'{k}:{logs[k]}')
+                    #print(f'{k}:{logs[k]}')
+                    logger.info(f'{k}:{logs[k]}')
 
     def on_train_begin(self, logs=None):
         self.metrics = [self.params['loss']] + self.params['metrics']

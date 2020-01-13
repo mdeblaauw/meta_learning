@@ -1,5 +1,5 @@
-# meta_learning
-Meta learning repo that has a reproducible experimental environment implemented with Pytorch. The main focus is to run this package on Sagemaker, such that experiments can be easily executed. 
+ # meta_learning
+Meta learning repo that has a reproducible experimental environment implemented with Pytorch. The main focus is to run this package on Sagemaker, such that experiments can be easily executed and maintained. 
 
 ## Implemented meta-learning algorithms
 

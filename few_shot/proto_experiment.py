@@ -24,7 +24,7 @@ USE_CUDA = torch.cuda.is_available()
 device = torch.device("cuda" if USE_CUDA else "cpu")
 
 def Initialise_training(args):
-    background = OmniglotDataset('background', args.data_train, unzip=False)
+    background = OmniglotDataset('background', args.data_train, unzip=True)
     background_taskloader = DataLoader(
         background,
         batch_sampler=NShotTaskSampler(
@@ -37,7 +37,7 @@ def Initialise_training(args):
         num_workers=4
     )
 
-    evaluation = OmniglotDataset('evaluation', args.data_test, unzip=False)
+    evaluation = OmniglotDataset('evaluation', args.data_test, unzip=True)
     evaluation_taskloader = DataLoader(
         evaluation,
         batch_sampler=NShotTaskSampler(

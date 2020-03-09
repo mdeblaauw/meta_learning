@@ -1,7 +1,6 @@
-from typing import Dict
+from typing import Dict, Tuple
 from .episodic_dataset import EpisodicDataset
-import numpy as np
-from skimage import io
+from PIL import Image
 from torchvision import transforms
 
 
@@ -19,33 +18,51 @@ class EpisodicImageDataset(EpisodicDataset):
             transform {transforms.Compose} -- Image transformation pipeline.
         """
         super().__init__(configuration, datapath, subset)
-        # TODO resize transform
-        self.transform = transforms.Compose([transforms.ToTensor()])
+        self.transform = transforms.Compose(
+            [transforms.Resize(configuration['resize']),
+             transforms.ToTensor()]
+        )
         if transform:
             self.transform = transform
 
-    def read_image(self, image_path: str) -> np.ndarray:
+    def read_image(self, image_path: str) -> Image:
         """Reads the image from disk.
 
         Arguments:
             image_path {str} -- Direct image path.
 
         Returns:
-            np.ndarray -- A numpy matrix between 2-4 dimensions
+            PIL.Image -- A PIL Image between 2-4 dimensions
                 (greyscal, rgb or rgba).
         """
-        return io.imread(image_path)
+        return Image.open(image_path)
 
-    def apply_transform(self, sample: np.ndarray) -> 'torch.FloatTensor':
+    def apply_transform(self, sample: Image) -> 'torch.FloatTensor':
         """Applies transformations. Standard, image is resized by given
         configuration parameter and the image is transformed to a FloatTensor
         in range [0.0, 1.0], see ToTensor @
         https://pytorch.org/docs/stable/torchvision/transforms.html
+
+        Arguments:
+            sample {PIL.Image} -- PIL Image.
 
         Returns:
             torch.FloatTensor -- A transformed sample
         """
         return self.transform(sample)
 
-    def __getitem__(self, index: int):
-        return 0
+    def __getitem__(self, index: int) -> Tuple['torch.Tensor', int]:
+        """Returns a sample, label data pair given a sample id.
+
+        Arguments:
+            index {int} -- Sample id.
+
+        Returns:
+            Tuple['torch.Tensor', int] -- Read and transformed image with
+                label.
+        """
+        sample = self.read_image(self.datasetid_to_filepath[index])
+        sample = self.apply_transform(sample)
+        label = self.datasetid_to_class_id[index]
+
+        return sample, label

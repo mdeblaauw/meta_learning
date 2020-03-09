@@ -1,33 +1,39 @@
 import unittest
 import torch
+import sys
+import os
+import mock
+from unittest.mock import MagicMock, PropertyMock
+
+sys.path.append(os.path.join(os.path.dirname(sys.path[0]), 'few_shot'))
 
 from few_shot.meta_learning.datasets.episodic_dataset import \
     EpisodicDataset
-from few_shot.meta_learning.datasets.episodic_image_dataset import \
-    EpisodicImageDataset
+from few_shot.meta_learning.datasets.episodic_logo_dataset \
+    import EpisodicLogoDataset
+from few_shot.meta_learning.datasets import create_dataset
+from few_shot.meta_learning.datasets import find_dataset_using_name
 
 
 class test_datasets(unittest.TestCase):
     def test_episodic_dataset(self):
-        image_path = 'tests/dummy_datasets/images'
-        configuration = {'resize': 50}
-        subset = 'train'
+        configuration = {'datapath': 'tests/dummy_datasets/images',
+                         'resize': 50, 'subset': 'train'}
 
-        image_ep_data = EpisodicImageDataset(configuration, subset, image_path)
+        logo_ep_data = EpisodicLogoDataset(configuration)
 
         numb_samples = 10
         numb_classes = 3
 
-        self.assertEqual(len(image_ep_data), numb_samples)
-        self.assertEqual(image_ep_data.num_classes(), numb_classes)
+        self.assertEqual(len(logo_ep_data), numb_samples)
+        self.assertEqual(logo_ep_data.num_classes(), numb_classes)
 
-    def test_episodic_image_dataset(self):
-        image_path = 'tests/dummy_datasets/images'
-        configuration = {'resize': 50}
-        subset = 'train'
+    def test_episodic_logo_dataset(self):
+        configuration = {'datapath': 'tests/dummy_datasets/images',
+                         'resize': 50, 'subset': 'train'}
 
-        image_ep_data = EpisodicImageDataset(configuration, subset, image_path)
-        sample, label = image_ep_data[0]
+        logo_ep_data = EpisodicLogoDataset(configuration)
+        sample, label = logo_ep_data[0]
 
         self.assertEqual(label, 2)
         self.assertEqual(type(label), int)
@@ -35,6 +41,52 @@ class test_datasets(unittest.TestCase):
         self.assertEqual(sample.type(), 'torch.FloatTensor')
         # Check resize transform to 50
         self.assertEqual(sample.shape[1], 50)
+        self.assertEqual(sample.shape[2], 50)
+        self.assertEqual(sample.shape[0], 3)
+
+    def test_find_dataset_using_name(self):
+        """Unittest find_dataset_using_name method.
+        """
+        dataset = find_dataset_using_name('episodic_logo')
+
+        self.assertEqual(dataset.__name__, 'EpisodicLogoDataset')
+
+    @mock.patch("few_shot.meta_learning.datasets.importlib")
+    def test_find_dataset_using_name_raises(self, mock_importlib):
+        """Test NotImplementedError raise by mocking importlib.
+        """
+        mock_importlib.import_module
+
+        self.assertRaises(
+            NotImplementedError, find_dataset_using_name, 'episodic_dummy'
+        )
+
+    def test_create_dataset(self):
+        """Test if dataloader is returned and is able to iterate
+        one epoch through samples.
+        """
+        configuration = {'datapath': 'tests/dummy_datasets/images',
+                         'resize': 50, 'subset': 'train',
+                         'dataset_name': 'episodic_logo',
+                         'loader_params': {
+                                           "batch_size": 5,
+                                           "shuffle": True,
+                                           "num_workers": 4,
+                                           "pin_memory": True
+                                }
+                         }
+
+        data_loader = create_dataset(configuration)
+        self.assertEqual(len(data_loader), 10)
+
+        batch = data_loader
+
+        for i, data in enumerate(data_loader):
+            last = i
+            x, y = data
+        self.assertEqual(last, 1)
+        self.assertEqual(x.size(), torch.Size([5, 3, 50, 50]))
+        self.assertEqual(y.size(), torch.Size([5]))
 
 
 if __name__ == '__main__':

@@ -3,8 +3,8 @@
 samplers = ['episodic']  # list of custom samplers
 
 
-def check_for_sampler():
-    dummy
+def check_for_sampler(dataset_name: str) -> bool:
+    return False
 
 
 def import_sampler():

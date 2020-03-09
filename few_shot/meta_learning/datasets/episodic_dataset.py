@@ -13,8 +13,7 @@ class EpisodicDataset(BaseDataset):
     See the static index subset method to see how the data should be
     structured.
     """
-    def __init__(self, configuration: Dict, datapath: str,
-                 subset: str, preprocess_fn: str = None):
+    def __init__(self, configuration: Dict, preprocess_fn: str = None):
         """Initialise the parameters and the BaseDataset parent class.
 
         Arguments:
@@ -27,12 +26,12 @@ class EpisodicDataset(BaseDataset):
             preprocess_fn {str} -- TODO: Which function to preprocess
                 the data, such as unzipping. (default: {None})
         """
-        assert subset in ['train', 'evaluate'], 'Subset must be one of ' + \
-                                                '"train" or "evaluate"'
+        assert configuration['subset'] in ['train', 'evaluate'], '''Subset must
+                                            be one of train" or "evaluate'''
 
         super().__init__(configuration)
-        self.datapath = datapath
-        self.subset = subset
+        self.datapath = configuration['datapath']
+        self.subset = configuration['subset']
         self.preprocess_fn = preprocess_fn
 
         if preprocess_fn:

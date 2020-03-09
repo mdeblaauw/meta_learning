@@ -4,11 +4,10 @@ from PIL import Image
 from torchvision import transforms
 
 
-class EpisodicImageDataset(EpisodicDataset):
-    """This is a child class of the abstract base class for image datasets.
+class EpisodicLogoDataset(EpisodicDataset):
+    """This is a child class of the abstract base class for logo datasets.
     """
     def __init__(self, configuration: Dict,
-                 subset: str, datapath: str,
                  transform: transforms.Compose = None):
         """Initialize the class, uses the configuration file to initialise the
         parent class and uses a transform pipeline if given.
@@ -17,9 +16,10 @@ class EpisodicImageDataset(EpisodicDataset):
             configuration {Dict} -- Configuration file.
             transform {transforms.Compose} -- Image transformation pipeline.
         """
-        super().__init__(configuration, datapath, subset)
+        super().__init__(configuration)
         self.transform = transforms.Compose(
-            [transforms.Resize(configuration['resize']),
+            [transforms.Resize((configuration['resize'],
+                                configuration['resize'])),
              transforms.ToTensor()]
         )
         if transform:
@@ -35,7 +35,7 @@ class EpisodicImageDataset(EpisodicDataset):
             PIL.Image -- A PIL Image between 2-4 dimensions
                 (greyscal, rgb or rgba).
         """
-        return Image.open(image_path)
+        return Image.open(image_path).convert('RGB')
 
     def apply_transform(self, sample: Image) -> 'torch.FloatTensor':
         """Applies transformations. Standard, image is resized by given

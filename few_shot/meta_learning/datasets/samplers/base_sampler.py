@@ -4,7 +4,7 @@ from typing import Dict
 import torch.utils.data as data
 
 
-class BaseSampler(Sampler, ABC):
+class BaseSampler(data.Sampler, ABC):
     """This is an abstract base class for samplers.
     """
     def __init__(self, dataset: data.Dataset, configuration: Dict):
@@ -27,6 +27,6 @@ class BaseSampler(Sampler, ABC):
 
     @abstractmethod
     def __iter__(self):
-        """Logic of which samples per batch should be given.
+        """Logic in which samples per batch should be given.
         """
         pass

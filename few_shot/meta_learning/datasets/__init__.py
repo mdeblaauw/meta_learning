@@ -4,6 +4,8 @@ from meta_learning.datasets.samplers import check_for_sampler, create_sampler
 from typing import Dict
 from torch.utils import data
 
+from meta_learning.datasets.samplers.episodic_sampler import EpisodicSampler
+
 
 def find_dataset_using_name(dataset_name: str):
     """Import the module meta_learning/datasets/[dataset_name]_dataset.py.
@@ -69,12 +71,12 @@ class CustomDatasetDataLoader():
 
         # A custom sampler is used if there exist one for the dataset
         if check_for_sampler(configuration['dataset_name']):
-            self.sampler = create_sampler(configuration)
-            print(f'Sampler {self.sampler.__name__} is created')
+            self.sampler = create_sampler(configuration, self.dataset)
+            print(f'Sampler {type(self.sampler).__name__} is created')
 
             self.dataloader = data.DataLoader(
                 self.dataset, **configuration['loader_params'],
-                sampler=self.sampler
+                batch_sampler=self.sampler
             )
         else:
             self.dataloader = data.DataLoader(

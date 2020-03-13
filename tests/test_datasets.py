@@ -3,8 +3,6 @@ import torch
 import sys
 import os
 import mock
-from unittest.mock import MagicMock, PropertyMock
-from torch.utils import data
 
 sys.path.append(os.path.join(os.path.dirname(sys.path[0]), 'few_shot'))
 
@@ -104,31 +102,6 @@ class test_datasets(unittest.TestCase):
 
         output = check_for_sampler('false')
         self.assertFalse(output)
-
-    # def test_episodic_sampler(self):
-    #     configuration = {'datapath': 'tests/dummy_datasets/images',
-    #                      'resize': 50, 'subset': 'train',
-    #                      'dataset_name': 'episodic_logo',
-    #                      'loader_params': {
-    #                                        "num_workers": 0,
-    #                                        "pin_memory": False
-    #                             },
-    #                      'sampler_params': {
-    #                                         "episodes_per_epoch": 10,
-    #                                         "k": 1,
-    #                                         "n": 1,
-    #                                         "q": 1
-    #                             }
-    #                      }
-
-    #     logo_ep_data = EpisodicLogoDataset(configuration)
-
-    #     sampler = EpisodicSampler(logo_ep_data, configuration['sampler_params'])
-    #     # out_iter = iter(sampler)
-    #     # print(next(out_iter))
-    #     loder = data.DataLoader(dataset=logo_ep_data, batch_sampler=sampler)
-    #     for i in enumerate(loder):
-    #         print(i)
 
 
 if __name__ == '__main__':

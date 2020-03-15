@@ -1,0 +1,41 @@
+{
+    "train_dataset_params": {
+        "dataset_name": "episodic_logo",
+        "dataset_path": "",
+        "subset": "train",
+        "loader_params": {
+            "num_workers": 4,
+            "pin_memory": false
+        },
+        "sampler_params": {
+            "episodes_per_epoch": 2,
+            "k": 1,
+            "n": 1,
+            "q": 1
+        },
+        "size": 50
+    },
+    "val_dataset_params": {
+        "dataset_name": "episodic_logo",
+        "dataset_path": "",
+        "subset": "evaluate",
+        "loader_params": {
+            "num_workers": 4,
+            "pin_memory": false
+        },
+        "sampler_params": {
+            "episodes_per_epoch": 2,
+            "k": 1,
+            "n": 1,
+            "q": 1
+        },
+        "size": 50
+    },
+    "model_params": {
+        "model_name": "protonet",
+        "is_train": true,
+        "max_epochs": 40,
+        "lr": 0.01,
+        "checkpoint_path": "dummy"
+    }
+}

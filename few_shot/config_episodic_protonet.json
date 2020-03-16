@@ -36,6 +36,8 @@
         "is_train": true,
         "max_epochs": 40,
         "lr": 0.01,
+        "lr_policy": "step",
+        "lr_decay_iters": 10,
         "checkpoint_path": "dummy"
     }
 }

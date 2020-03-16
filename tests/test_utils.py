@@ -1,6 +1,8 @@
 import unittest
+import mock
 import torch
-from few_shot.meta_learning.utils import transfer_to_device
+from few_shot.meta_learning.utils import \
+    transfer_to_device, get_scheduler
 
 
 class TestUtils(unittest.TestCase):
@@ -19,6 +21,23 @@ class TestUtils(unittest.TestCase):
         out = transfer_to_device(dummy_torch_v2, torch.device("cpu"))
         for i, j in zip(dummy_torch_v2, out):
             self.assertTrue(torch.all(i[0].eq(j[0])))
+
+    @mock.patch('few_shot.meta_learning.utils.lr_scheduler')
+    def test_get_scheduler(self, mock_lr_scheduler):
+        """Test if different conditions are called in get_scheduler.
+
+        Arguments:
+            mock_lr_scheduler -- Mock torch.optim.lr_scheduler.
+        """
+        output = get_scheduler('a', {'lr_policy': 'a'})
+        self.assertIsInstance(output, NotImplementedError)
+
+        # test if step calls StepLR
+        mock_lr_scheduler.StepLR.return_value = 'called'
+        output = get_scheduler(
+            'a', {'lr_policy': 'step', 'lr_decay_iters': 'b'}
+        )
+        self.assertEqual(output, 'called')
 
 
 if __name__ == '__main__':

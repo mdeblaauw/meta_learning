@@ -2,6 +2,7 @@ import os
 import torch
 from abc import ABC, abstractmethod
 from typing import Tuple
+from collections import OrderedDict
 from ..utils import transfer_to_device, get_scheduler
 
 
@@ -12,7 +13,7 @@ class BaseModel(ABC):
         self.use_cuda = torch.cuda.is_available()
         self.device = torch.device('cuda:0') \
             if self.use_cuda else torch.device('cpu')
-        # only true when same input size to model.
+        # only true when same input size to model for every batch.
         torch.backends.cudnn.benchmark = True
         self.save_dir = configuration['checkpoint_path']
         self.network_names = []
@@ -99,20 +100,101 @@ class BaseModel(ABC):
         lr = self.optimizer[0].param_groups[0]['lr']
         print(f'Learning rate = {lr}')
 
-    def save_networks(self, epoch):
+    def save_networks(self, epoch: int):
+        """Save all the networks to disk.
 
-    def load_networks(self, epoch):
+        Arguments:
+            epoch {int} -- State of epoch.
+        """
+        for name in self.network_names:
+            if isinstance(name, str):
+                save_filename = f'{epoch}_net_{name}.pth'
+                save_path = os.path.join(self.save_dir, save_filename)
+                net = getattr(self, 'net' + name)
 
-    def save_optimizers(self, epoch):
+                if self.use_cuda:
+                    torch.save(net.cpu(), save_path)
+                    net.to(self.device)
+                else:
+                    torch.save(net.cpu().state_dict(), save_path)
 
-    def load_optimizers(self, epoch):
+    def load_networks(self, epoch: int):
+        """Load all the networks from disk.
+
+        Arguments:
+            epoch {int} -- State of epoch.
+        """
+        for name in self.network_names:
+            if isinstance(name, str):
+                load_filename = f'{epoch}_net_{name}.pth'
+                load_path = os.path.join(self.save_dir, load_filename)
+                net = getattr(self, 'net' + name)
+                if isinstance(net, torch.nn.DataParallel):
+                    net.module
+                print(f'Loading the model from {load_path}')
+                state_dict = torch.load(load_path, map_location=self.device)
+                if hasattr(state_dict, '_metadata'):
+                    del state_dict._metadata
+                net.load_state_dict(state_dict)
+
+    def save_optimizers(self, epoch: int):
+        """Save all the optimizers to disk. Such that
+        you can restart training.
+
+        Arguments:
+            epoch {int} -- State of epoch.
+        """
+        for i, optimizer in self.optimizers:
+            save_filename = f'{epoch}_optimizer_{i}.pth'
+            save_path = os.path.join(self.save_dir, save_filename)
+
+            torch.save(optimizer.state_dict(), save_path)
+
+    def load_optimizers(self, epoch: int):
+        """Load all the optimizers from disk.
+
+        Arguments:
+            epoch {int} -- State of epoch.
+        """
+        for i, optimizer in self.optimizers:
+            load_filename = f'{epoch}_optimizer_{i}.pth'
+            load_path = os.path.join(self.save_dir, load_filename)
+            print(f'Loading the optimizer from {load_path}')
+            state_dict = torch.load(load_path)
+            if hasattr(state_dict, '_metadata'):
+                del state_dict._metadata
+            optimizer.load_state_dict(state_dict)
 
     def print_networks(self):
+        """Print the total number of parameters in the network and network
+        architecture.
+        """
+        print('Network initialized')
+        for name in self.network_names:
+            if isinstance(name, str):
+                net = getattr(self, 'net' + name)
+                num_params = 0
+                for param in net.parameters():
+                    num_params += param.numel()
+                print(net)
+                print((f'[Network {name}] Has a total number of'
+                       f'parameters: {num_params}'))
 
-    def set_requires_grad(self):
+    def get_current_losses(self) -> float:
+        """Return training losses. train.py prints these out.
 
-    def get_current_losses(self):
+        Returns:
+            float -- Computed loss.
+        """
+        errors_ret = OrderedDict()
+        for name in self.loss_names:
+            if isinstance(name, str):
+                # float(...) works for both scalar tensor and float number
+                errors_ret[name] = float(getattr(self, 'loss_' + name))
+            return errors_ret
 
-    def pre_epoch_callback(self, epoch):
+    def pre_epoch_callback(self, epoch: int):
+        pass
 
-    def post_epoch_callback(self, epoch):
+    def post_epoch_callback(self, epoch: int):
+        pass

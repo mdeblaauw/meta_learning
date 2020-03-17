@@ -1,13 +1,28 @@
 import os
 import torch
 from abc import ABC, abstractmethod
-from typing import Tuple
+from typing import Tuple, Dict
 from collections import OrderedDict
 from ..utils import transfer_to_device, get_scheduler
 
 
 class BaseModel(ABC):
-    def __init__(self, configuration):
+    """This class is an abstract base class (ABC) for models.
+    """
+    def __init__(self, configuration: Dict):
+        """Initialise the BaseModel class.
+
+        Arguments:
+            configuration {Dict} -- The configuration file.
+
+        When creating your own custom class, you need to implement a custom
+        initialisation. In this function, you should first call
+        `super().__init__(self, configuration)`. Then, you need to define
+        these lists:
+            -- self.network_names {List[str]}. Should be `net[name]`.
+            -- self.loss_names {List[str]}. Should be `loss_[name]`
+            -- self.optimizers {List[torch.optim]}
+        """
         self.configuration = configuration
         self.is_train = configuration['is_train']
         self.use_cuda = torch.cuda.is_available()

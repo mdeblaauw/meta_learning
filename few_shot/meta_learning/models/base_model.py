@@ -44,8 +44,8 @@ class BaseModel(ABC):
             input {Tuple[torch.Tensor, torch.Tensor]} -- A tuple of input and
                 label tensors.
         """
-        self.input = transfer_to_device(self.input[0], self.device)
-        self.label = transfer_to_device(self.input[1], self.device)
+        self.input = transfer_to_device(input[0], self.device)
+        self.label = transfer_to_device(input[1], self.device)
 
     @abstractmethod
     def forward(self):
@@ -112,7 +112,7 @@ class BaseModel(ABC):
             scheduler.step()
 
         # Print new learning rate.
-        lr = self.optimizer[0].param_groups[0]['lr']
+        lr = self.optimizers[0].param_groups[0]['lr']
         print(f'Learning rate = {lr}')
 
     def save_networks(self, epoch: int):
@@ -192,7 +192,7 @@ class BaseModel(ABC):
                 for param in net.parameters():
                     num_params += param.numel()
                 print(net)
-                print((f'[Network {name}] Has a total number of'
+                print((f'Network {name}, has a total number of '
                        f'parameters: {num_params}'))
 
     def get_current_losses(self) -> float:

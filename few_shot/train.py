@@ -3,6 +3,7 @@ import os
 import json
 from typing import Dict
 from meta_learning.datasets import create_dataset
+from meta_learning.models import create_model
 
 
 def train(config_file: Dict):
@@ -16,6 +17,38 @@ def train(config_file: Dict):
     print(f'The number of validation samples = {val_dataset_size}')
 
     print('Initialise model...')
+    model = create_model(config_file['model_params'])
+    model.setup()
+
+    starting_epoch = config_file['model_params']['load_checkpoint'] + 1
+    num_epochs = config_file['model_params']['epochs'] + 1
+
+    for epoch in range(starting_epoch, num_epochs):
+        epoch_start_time = time.time()
+        train_dataset.dataset.pre_epoch_callback(epoch)
+        model.pre_epoch_callback(epoch)
+
+        model.train()
+        for i, data in enumerate(train_dataset):
+            model.set_input(data)
+            model.forward()
+            model.backward()
+            model.optimize_parameters()
+
+        model.eval()
+        for i, data in enumerate(val_dataset):
+            model.set_input()
+            model.test()
+
+        if epoch % config_file['save_freq'] == 0:
+            print(f'Saving model at the end of epoch {epoch}')
+            model.save_networks()
+            model.save_optimizers(epoch)
+
+        model.update_learning_rate()
+
+        print(f'End of epoch {epoch} of {num_epochs}')
+        print(f'Time taken: {time.time() - epoch_start_time} sec')
 
 
 if __name__ == '__main__':

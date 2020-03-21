@@ -1,5 +1,7 @@
 import unittest
 import torch
+import tempfile
+import shutil
 from typing import Dict
 from few_shot.meta_learning.models.base_model import \
     BaseModel
@@ -124,9 +126,69 @@ class TestBaseModel(unittest.TestCase):
                     model.optimizers[0].param_groups[0]['lr'], 0.3
                 )
 
-        def test_base_model_load_and_save(self):
-            # TODO
-            dummy
+    def test_base_model_load_and_save(self):
+        """Test if the load, save and setup function work.
+        """
+        input_data = torch.zeros((1, 3))
+        label = torch.Tensor([[0]])
+
+        temp_save_dir = tempfile.mkdtemp()
+
+        config = {
+            'is_train': True,
+            'checkpoint_path': temp_save_dir,
+            'load_checkpoint': 0,
+            'epochs': 2,
+            'lr': 1,
+            'lr_policy': 'step',
+            'lr_decay_iters': 2
+        }
+        model = TestModel(config)
+        model.setup()
+
+        # check save and load functions.
+        for i in range(config['epochs']):
+            model.train()
+            model.set_input((input_data, label))
+            model.forward()
+            model.compute_loss()
+            model.optimizer_parameters()
+            model.update_learning_rate()
+
+        model.save_networks(epoch=2)
+        model.save_optimizers(epoch=2)
+
+        new_model = TestModel(config)
+        new_model.load_networks(epoch=2)
+        new_model.load_optimizers(epoch=2)
+
+        self.assertEqual(
+            new_model.optimizers[0].param_groups[0]['lr'], 0.3
+        )
+
+        # check setting lr and step count using setup() function is correct.
+        config['load_checkpoint'] = 2
+        new_model = TestModel(config)
+        new_model.setup()
+        self.assertEqual(
+                new_model.optimizers[0].param_groups[0]['lr'], 0.3
+            )
+        self.assertEqual(new_model.schedulers[0]._step_count, 3)
+
+        # check if step count for scheduler is correct.
+        for i in range(2):
+            new_model.train()
+            new_model.set_input((input_data, label))
+            new_model.forward()
+            new_model.compute_loss()
+            new_model.optimizer_parameters()
+            new_model.update_learning_rate()
+            if i > 0:
+                self.assertEqual(
+                    new_model.optimizers[0].param_groups[0]['lr'], 0.09
+                )
+
+        shutil.rmtree(temp_save_dir)
 
 
 if __name__ == '__main__':

@@ -69,15 +69,29 @@ class BaseModel(ABC):
         pass
 
     def setup(self):
-        """Load and print networks. Also, create schedulers. TODO
+        """Load and print networks. Also, create schedulers.
+        Load_checkpoint higher than 0 means that it tries to load
+        a previous checkpoint at epoch equal load_checkpoint. A load_checkpoint
+        of zero means a fresh training model without loading.
         """
-        if self.configuration['load_checkpoint'] >= 0:
-            print('Not yet implemented!')
+        if self.configuration['load_checkpoint'] > 0:
+            last_checkpoint = self.configuration['load_checkpoint']
         else:
-            last_checkpoint = -1
+            last_checkpoint = 0
+
+        if last_checkpoint > 0:
+            # enable restarting training
+            self.load_networks(last_checkpoint)
+            if self.is_train:
+                self.load_optimizers(last_checkpoint)
 
         self.schedulers = [get_scheduler(optimizer, self.configuration) for
                            optimizer in self.optimizers]
+
+        if last_checkpoint > 0:
+            for s in self.schedulers:
+                for i in range(last_checkpoint):
+                    s.step()
 
         # self.print_networks()
 
@@ -159,7 +173,7 @@ class BaseModel(ABC):
         Arguments:
             epoch {int} -- State of epoch.
         """
-        for i, optimizer in self.optimizers:
+        for i, optimizer in enumerate(self.optimizers):
             save_filename = f'{epoch}_optimizer_{i}.pth'
             save_path = os.path.join(self.save_dir, save_filename)
 
@@ -171,7 +185,7 @@ class BaseModel(ABC):
         Arguments:
             epoch {int} -- State of epoch.
         """
-        for i, optimizer in self.optimizers:
+        for i, optimizer in enumerate(self.optimizers):
             load_filename = f'{epoch}_optimizer_{i}.pth'
             load_path = os.path.join(self.save_dir, load_filename)
             print(f'Loading the optimizer from {load_path}')

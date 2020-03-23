@@ -2,7 +2,7 @@ import unittest
 import mock
 import torch
 from few_shot.meta_learning.utils import \
-    transfer_to_device, get_scheduler
+    transfer_to_device, get_scheduler, create_nshot_task
 
 
 class TestUtils(unittest.TestCase):
@@ -38,6 +38,16 @@ class TestUtils(unittest.TestCase):
             'a', {'lr_policy': 'step', 'lr_decay_iters': 'b'}
         )
         self.assertEqual(output, 'called')
+
+    def test_create_n_shot_task(self):
+        """Test label creation for episodic training. For this test,
+        we mock a k=3 and q=2 case.
+        """
+        expected_output = torch.Tensor([0, 0, 1, 1, 2, 2]).long()
+
+        output = create_nshot_task(k=3, q=2)
+
+        self.assertTrue(torch.all(output.eq(expected_output)))
 
 
 if __name__ == '__main__':

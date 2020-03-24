@@ -126,16 +126,18 @@ def pairwise_distances(x: torch.Tensor,
 
 
 def compute_class_mean(support: torch.Tensor, k: int, n: int) -> torch.Tensor:
-    """Compute class prototypes from support samples.
-    # Arguments
-        support: torch.Tensor. Tensor of shape (n * k, d) where d is the
+    """Compute class averages from a tensor with size (n * k, d). For which k
+    are the classes, n the support set (i.e., samples per class), and d the
+    representation length.
+
+    Arguments:
+        support {torch.Tensor} -- Tensor of shape (n * k, d) where d is the
             embedding dimension.
-        k: int. "k-way" i.e. number of classes in the classification task
-        n: int. "n-shot" of the classification task
-    # Returns
-        class_prototypes: Prototypes aka mean embeddings for each class
+        k {int} -- "k-way"; number of classes in the classification task.
+        n {int} -- "n-shot" of the classification task.
+
+    Returns:
+        torch.Tensor -- Prototypes aka mean embeddings for each class
     """
-    # Reshape so the first dimension indexes by class then take the mean
-    # along that dimension to generate the "prototypes" for each class
     class_means = support.reshape(k, n, -1).mean(dim=1)
     return class_means

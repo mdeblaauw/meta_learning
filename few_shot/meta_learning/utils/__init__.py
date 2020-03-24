@@ -105,7 +105,7 @@ def pairwise_distances(x: torch.Tensor,
     n_x = x.shape[0]
     n_y = y.shape[0]
     if matching_fn == 'gaussian' and S is None:
-        raise(ValueError('No variance matrix `S` supplied!'))
+        raise(ValueError('No inverse variance vector `S` supplied!'))
 
     if matching_fn == 'l2':
         distances = (

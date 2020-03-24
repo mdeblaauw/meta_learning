@@ -125,6 +125,26 @@ class TestUtils(unittest.TestCase):
             torch.allclose(output_cosine, cosine_expected_output, atol=1e-5)
         )
 
+        # Test dot product distance
+        dot_expected_output = torch.Tensor([
+            [-6, -2],
+            [-18, -6]
+        ])
+
+        output_dot = pairwise_distances(
+            l2_x_input, l2_y_input, 'dot'
+        )
+        self.assertTrue(
+            torch.all(output_dot.eq(dot_expected_output))
+        )
+
+        self.assertRaises(
+            ValueError, pairwise_distances, l2_x_input, l2_y_input, 'gaussian'
+        )
+        self.assertRaises(
+            ValueError, pairwise_distances, l2_x_input, l2_y_input, 'dummy'
+        )
+
 
 if __name__ == '__main__':
     unittest.main()

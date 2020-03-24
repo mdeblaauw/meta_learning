@@ -1,8 +1,9 @@
 import unittest
 import mock
+import math
 import torch
 from few_shot.meta_learning.utils import \
-    transfer_to_device, get_scheduler, create_nshot_task, compute_class_mean
+    transfer_to_device, get_scheduler, create_nshot_task, compute_class_mean, pairwise_distances
 
 
 class TestUtils(unittest.TestCase):
@@ -70,6 +71,45 @@ class TestUtils(unittest.TestCase):
         output = compute_class_mean(dummy_input, k=3, n=2)
 
         self.assertTrue(torch.all(output.eq(expected_output)))
+
+    def test_pairwise_distances(self):
+
+        # Test l2 (euclidian distance)
+        l2_x_input = torch.Tensor([
+            [1, 1],
+            [3, 3]
+        ])
+
+        l2_y_input = torch.Tensor([
+            [3, 3],
+            [1, 1]
+        ])
+
+        l2_expected_output = torch.Tensor([
+            [2 * math.sqrt(2), 0],
+            [0, 2 * math.sqrt(2)]
+        ])
+
+        output_l2 = pairwise_distances(l2_x_input, l2_y_input, 'l2')
+        self.assertTrue(torch.all(output_l2.eq(l2_expected_output)))
+
+        # Test gaussian distance
+        gaussian_S_input = torch.Tensor([
+            [1, 1],
+            [2, 2]
+        ])
+
+        gaussian_expected_output = torch.Tensor([
+            [2 * math.sqrt(2), 0],
+            [0, 4]
+        ])
+
+        output_gaussian = pairwise_distances(
+            l2_x_input, l2_y_input, 'gaussian', gaussian_S_input
+        )
+        self.assertTrue(
+            torch.all(output_gaussian.eq(gaussian_expected_output))
+        )
 
 
 if __name__ == '__main__':

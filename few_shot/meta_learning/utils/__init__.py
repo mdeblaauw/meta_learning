@@ -76,37 +76,46 @@ def create_nshot_task(k: int, q: int) -> torch.Tensor:
 def pairwise_distances(x: torch.Tensor,
                        y: torch.Tensor,
                        matching_fn: str,
-                       S = None) -> torch.Tensor:
-    """Efficiently calculate pairwise distances (or other similarity scores) between
-    two sets of samples.
-    # Arguments
-        x: Query samples. A tensor of shape (n_x, d) where d is the embedding dimension
-        y: Class prototypes. A tensor of shape (n_y, d) where d is the embedding dimension
-        matching_fn: Distance metric/similarity score to compute between samples
+                       S: torch.Tensor = None) -> torch.Tensor:
+    """Efficiently calculate pairwise distances (or other similarity scores)
+    between two sets of samples.
+
+    Note that `S` should be an inverse diagonal covariance vector.
+
+    Arguments:
+        x {torch.Tensor} -- A tensor of shape (n_x, d) where d is the
+            embedding dimension. These can be seen as queries.
+        y {torch.Tensor} -- A tensor of shape (n_y, d) where d is the
+            embedding dimension. These can be seen as class prototypes.
+        matching_fn {str} -- Distance metric/similarity score to compute
+            between samples.
+
+    Keyword Arguments:
+        S {[type]} -- An inverse covariance matrix to compute the mahanalobis
+            distance, with shape (n_y, d).
+            See https://en.wikipedia.org/wiki/Mahalanobis_distance
+            (default: {None})
+
+    Returns:
+        torch.Tensor -- A tensor with shape (n_x, n_y).
     """
     n_x = x.shape[0]
     n_y = y.shape[0]
+    if matching_fn == 'gaussian' and S is None:
+        raise(ValueError('No variance matrix `S` supplied!'))
 
     if matching_fn == 'l2':
         distances = (
                 x.unsqueeze(1).expand(n_x, n_y, -1) -
                 y.unsqueeze(0).expand(n_x, n_y, -1)
         ).pow(2).sum(dim=2)
-        return distances
+        return distances.sqrt()
     elif matching_fn == 'gaussian':
         distances = ((
                 x.unsqueeze(1).expand(n_x, n_y, -1) -
                 y.unsqueeze(0).expand(n_x, n_y, -1)
-        ).pow(2) * S.unsqueeze(0).expand(n_x, n_y,-1)).sum(dim=2)
-    
-        distances = distances.sqrt()
-        return distances
-    elif matching_fn == 'gaussian_v2':
-        difference = x.unsqueeze(1).expand(n_x, n_y, -1) - y.unsqueeze(0).expand(n_x, n_y, -1)
-        difference_two = torch.matmul(S.unsqueeze(0).expand(n_x, n_y,-1,-1), difference.unsqueeze(3))
-        distances = torch.matmul(difference.unsqueeze(2), difference_two).squeeze()
-        distances = distances.sqrt()
-        return distances
+        ).pow(2) * S.unsqueeze(0).expand(n_x, n_y, -1)).sum(dim=2)
+        return distances.sqrt()
     elif matching_fn == 'cosine':
         normalised_x = x / (x.pow(2).sum(dim=1, keepdim=True).sqrt() + EPSILON)
         normalised_y = y / (y.pow(2).sum(dim=1, keepdim=True).sqrt() + EPSILON)

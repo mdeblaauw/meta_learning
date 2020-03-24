@@ -74,7 +74,9 @@ class TestUtils(unittest.TestCase):
         self.assertTrue(torch.all(output.eq(expected_output)))
 
     def test_pairwise_distances(self):
-
+        """Test the pairwise_distances function on different similarity
+        functions and raises.
+        """
         # Test l2 (euclidian distance)
         l2_x_input = torch.Tensor([
             [1, 1],

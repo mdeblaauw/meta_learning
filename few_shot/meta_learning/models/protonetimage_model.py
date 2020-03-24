@@ -1,6 +1,7 @@
 from typing import Tuple, Dict
 from .base_model import BaseModel
-from ..utils import create_nshot_task, pairwise_distances, compute_class_mean
+from ..utils import create_nshot_task, pairwise_distances, \
+    compute_class_mean, transfer_to_device
 from ..metrics import categorical_accuracy
 import torch
 import torch.nn as nn
@@ -17,7 +18,7 @@ def conv2_block(in_channels: int, out_channels: int) -> nn.Sequential:
         nn.Sequential -- A convolution block.
     """
     return nn.Sequential(
-        nn.Conv2d(in_channels, out_channels, kernel=3, padding=1),
+        nn.Conv2d(in_channels, out_channels, kernel_size=3, padding=1),
         nn.BatchNorm2d(out_channels),
         nn.ReLU(),
         nn.MaxPool2d(kernel_size=2, stride=2)
@@ -44,6 +45,7 @@ class ProtoNetStandard(nn.Module):
             in_c {int} -- Input channels. For RGB, three and
             greyscale, one.
         """
+        super().__init__()
         # Length of encoding network.
         self.enc_size = [in_c, 64, 64, 64, 64]
 
@@ -66,22 +68,27 @@ class ProtoNetStandard(nn.Module):
         return self.representation(x)
 
 
-class ProtonetImage(BaseModel):
+class ProtonetImageModel(BaseModel):
     def __init__(self, configuration: Dict):
         """Initialise the model.
         """
         super().__init__(configuration)
 
-        self.loss_name = ['protonet']
-        self.network_names['protonetstandard']
+        self.k = configuration['k']
+        self.n = configuration['n']
+        self.q = configuration['q']
+        self.distance = configuration['distance']
 
-        self.protonet = ProtoNetStandard(3)
-        self.protonet = self.protonet.to(self.device)
+        self.loss_name = ['protonet']
+        self.network_names = ['protonetstandard']
+
+        self.netprotonetstandard = ProtoNetStandard(3)
+        self.netprotonetstandard = self.netprotonetstandard.to(self.device)
 
         if self.is_train:
             self.loss_function = nn.CrossEntropyLoss()
             self.optimizer = torch.optim.Adam(
-                self.protonet.parameters(), lr=configuration['lr']
+                self.netprotonetstandard.parameters(), lr=configuration['lr']
             )
             self.optimizers = [self.optimizer]
 
@@ -108,7 +115,7 @@ class ProtonetImage(BaseModel):
         """Run a forward pass for prototypical networks.
         """
         # Embed support and queries
-        embeddings = self.protonet(self.input)
+        embeddings = self.netprotonetstandard(self.input)
 
         # Split support and queries.
         support = embeddings[:self.n*self.k]
@@ -125,7 +132,11 @@ class ProtonetImage(BaseModel):
         """
         self.loss_protonet = self.loss_function(-self.output, self.label)
 
-    def optimizer_parameters(self):
+        # temporary, until callbacklist is created.
+        self.train_predictions.append(self.output)
+        self.train_labels.append(self.label)
+
+    def optimize_parameters(self):
         """Perform a backward pass.
         """
         self.loss_protonet.backward()
@@ -139,7 +150,7 @@ class ProtonetImage(BaseModel):
         # run a forward pass.
         super().test()
 
-        self.val_predictions.append(self.input)
+        self.val_predictions.append(self.output)
         self.val_labels.append(self.label)
 
     def post_epoch_callback(self, epoch: int):

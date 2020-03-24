@@ -1,46 +1,49 @@
 {
     "train_dataset_params": {
         "dataset_name": "episodic_logo",
-        "dataset_path": "",
+        "datapath": "../data/Logos",
         "subset": "train",
         "loader_params": {
             "num_workers": 4,
             "pin_memory": false
         },
         "sampler_params": {
-            "episodes_per_epoch": 2,
-            "k": 1,
-            "n": 1,
-            "q": 1
+            "episodes_per_epoch": 10,
+            "k": 5,
+            "n": 5,
+            "q": 5
         },
-        "size": 50
+        "resize": 30
     },
     "val_dataset_params": {
         "dataset_name": "episodic_logo",
-        "dataset_path": "",
+        "datapath": "../data/Logos",
         "subset": "evaluate",
         "loader_params": {
             "num_workers": 4,
             "pin_memory": false
         },
         "sampler_params": {
-            "episodes_per_epoch": 2,
-            "k": 1,
-            "n": 1,
-            "q": 1
+            "episodes_per_epoch": 10,
+            "k": 5,
+            "n": 5,
+            "q": 5
         },
-        "size": 50
+        "resize": 30
     },
     "model_params": {
-        "model_name": "protonet",
+        "model_name": "protonetimage",
         "is_train": true,
-        "max_epochs": 40,
+        "epochs": 10,
         "lr": 0.01,
         "lr_policy": "step",
         "lr_decay_iters": 10,
-        "checkpoint_path": "dummy",
-        "k": 1,
-        "n": 1,
-        "q": 1
-    }
+        "checkpoint_path": "",
+        "load_checkpoint": 0,
+        "k": 5,
+        "n": 5,
+        "q": 5,
+        "distance": "l2"
+    },
+    "save_freq": 20
 }

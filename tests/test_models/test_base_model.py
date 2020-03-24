@@ -43,7 +43,7 @@ class TestModel(BaseModel):
         """
         self.loss_simple = self.mse_loss(self.output, self.label)
 
-    def optimizer_parameters(self):
+    def optimize_parameters(self):
         """Perform backward pass to update weights.
         """
         self.loss_simple.backward()
@@ -88,7 +88,7 @@ class TestBaseModel(unittest.TestCase):
         self.assertEqual(type(model.get_current_losses()['simple']), float)
         self.assertEqual(model.get_current_losses()['simple'], 0.0)
 
-        model.optimizer_parameters()
+        model.optimize_parameters()
 
         # check if print net runs
         model.print_networks()
@@ -115,7 +115,7 @@ class TestBaseModel(unittest.TestCase):
             model.set_input((input_data, label))
             model.forward()
             model.compute_loss()
-            model.optimizer_parameters()
+            model.optimize_parameters()
             model.update_learning_rate()
             if i == 0:
                 self.assertEqual(
@@ -152,7 +152,7 @@ class TestBaseModel(unittest.TestCase):
             model.set_input((input_data, label))
             model.forward()
             model.compute_loss()
-            model.optimizer_parameters()
+            model.optimize_parameters()
             model.update_learning_rate()
 
         model.save_networks(epoch=2)
@@ -181,7 +181,7 @@ class TestBaseModel(unittest.TestCase):
             new_model.set_input((input_data, label))
             new_model.forward()
             new_model.compute_loss()
-            new_model.optimizer_parameters()
+            new_model.optimize_parameters()
             new_model.update_learning_rate()
             if i > 0:
                 self.assertEqual(

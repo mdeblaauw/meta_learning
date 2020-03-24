@@ -32,13 +32,15 @@ def train(config_file: Dict):
         for i, data in enumerate(train_dataset):
             model.set_input(data)
             model.forward()
-            model.backward()
+            model.compute_loss()
             model.optimize_parameters()
 
         model.eval()
         for i, data in enumerate(val_dataset):
-            model.set_input()
+            model.set_input(data)
             model.test()
+
+        model.post_epoch_callback(epoch)
 
         if epoch % config_file['save_freq'] == 0:
             print(f'Saving model at the end of epoch {epoch}')
@@ -47,15 +49,16 @@ def train(config_file: Dict):
 
         model.update_learning_rate()
 
-        print(f'End of epoch {epoch} of {num_epochs}')
-        print(f'Time taken: {time.time() - epoch_start_time} sec')
+        print(f'End of epoch {epoch} of {num_epochs - 1}')
+        print(f'Time taken: {time.time() - epoch_start_time:.3f} sec')
 
 
 if __name__ == '__main__':
     import multiprocessing
     multiprocessing.set_start_method('spawn', True)
 
-    configuration_file = json.load('config.json')
+    with open('config_episodic_protonet.json') as json_file:
+        configuration_file = json.load(json_file)
 
     # SageMaker env parameters
     if os.environ.get('SM_CHANNEL_TRAIN', None):

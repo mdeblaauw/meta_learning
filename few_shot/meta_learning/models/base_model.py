@@ -62,7 +62,7 @@ class BaseModel(ABC):
         pass
 
     @abstractmethod
-    def optimizer_parameters(self):
+    def optimize_parameters(self):
         """Calculate gradients and update network weights;
         called in every training iteration.
         """

@@ -9,11 +9,11 @@ def find_model_using_name(model_name: str):
     model = None
     target_model_name = model_name.replace('_', '') + 'model'
     for name, cls in modellib.__dict__.items():
-        if name.lower() == target_model_name() \
+        if name.lower() == target_model_name.lower() \
          and issubclass(cls, BaseModel):
             model = cls
 
-    if model:
+    if model is None:
         print(
             f'''In {model_filename}.py, there should be a subclass of
             BaseModel with class name that matches {target_model_name}

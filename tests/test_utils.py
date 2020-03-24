@@ -2,7 +2,7 @@ import unittest
 import mock
 import torch
 from few_shot.meta_learning.utils import \
-    transfer_to_device, get_scheduler, create_nshot_task
+    transfer_to_device, get_scheduler, create_nshot_task, compute_class_mean
 
 
 class TestUtils(unittest.TestCase):
@@ -46,6 +46,28 @@ class TestUtils(unittest.TestCase):
         expected_output = torch.Tensor([0, 0, 1, 1, 2, 2]).long()
 
         output = create_nshot_task(k=3, q=2)
+
+        self.assertTrue(torch.all(output.eq(expected_output)))
+
+    def test_compute_class_mean(self):
+        """Test compute class mean function.
+        """
+        dummy_input = torch.Tensor([
+            [1, 1, 1],
+            [1, 1, 1],
+            [2, 2, 2],
+            [2, 2, 2],
+            [3, 3, 3],
+            [3, 3, 3]
+        ])
+
+        expected_output = torch.Tensor([
+            [1, 1, 1],
+            [2, 2, 2],
+            [3, 3, 3]
+        ])
+
+        output = compute_class_mean(dummy_input, k=3, n=2)
 
         self.assertTrue(torch.all(output.eq(expected_output)))
 

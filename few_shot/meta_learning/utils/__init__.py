@@ -128,8 +128,8 @@ def pairwise_distances(x: torch.Tensor,
 def compute_class_mean(support: torch.Tensor, k: int, n: int) -> torch.Tensor:
     """Compute class prototypes from support samples.
     # Arguments
-        support: torch.Tensor. Tensor of shape (n * k, d) where d is the embedding
-            dimension.
+        support: torch.Tensor. Tensor of shape (n * k, d) where d is the
+            embedding dimension.
         k: int. "k-way" i.e. number of classes in the classification task
         n: int. "n-shot" of the classification task
     # Returns

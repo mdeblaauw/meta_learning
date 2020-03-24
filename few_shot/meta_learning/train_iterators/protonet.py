@@ -55,7 +55,7 @@ def pairwise_distances(x: torch.Tensor,
         return -(expanded_x * expanded_y).sum(dim=2)
     else:
         raise(ValueError('Unsupported similarity function'))
-        
+    
 def compute_prototypes(support: torch.Tensor, k: int, n: int) -> torch.Tensor:
     """Compute class prototypes from support samples.
     # Arguments

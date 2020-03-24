@@ -78,7 +78,10 @@ def pairwise_distances(x: torch.Tensor,
                        matching_fn: str,
                        S: torch.Tensor = None) -> torch.Tensor:
     """Efficiently calculate pairwise distances (or other similarity scores)
-    between two sets of samples.
+    between two sets of samples. Note that the direction of distances is
+    directed towards the distance metric. Smaller distance is closer. This
+    is not the case for the cosine and dot product. Hence, the adjustment of
+    1 - cosine and -1 * dot product.
 
     Note that `S` should be an inverse diagonal covariance vector.
 

@@ -3,7 +3,8 @@ import mock
 import math
 import torch
 from few_shot.meta_learning.utils import \
-    transfer_to_device, get_scheduler, create_nshot_task, compute_class_mean, pairwise_distances
+    transfer_to_device, get_scheduler, create_nshot_task, compute_class_mean, \
+    pairwise_distances
 
 
 class TestUtils(unittest.TestCase):
@@ -109,6 +110,19 @@ class TestUtils(unittest.TestCase):
         )
         self.assertTrue(
             torch.all(output_gaussian.eq(gaussian_expected_output))
+        )
+
+        # Test cosine distance
+        cosine_expected_output = torch.Tensor([
+            [0., 0.],
+            [0., 0.]
+        ])
+
+        output_cosine = pairwise_distances(
+            l2_x_input, l2_y_input, 'cosine'
+        )
+        self.assertTrue(
+            torch.allclose(output_cosine, cosine_expected_output, atol=1e-5)
         )
 
 

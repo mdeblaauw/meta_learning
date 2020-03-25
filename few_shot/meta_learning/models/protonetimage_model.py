@@ -50,7 +50,7 @@ class ProtoNetStandard(nn.Module):
         self.enc_size = [in_c, 64, 64, 64, 64]
 
         conv_blocks = [conv2_block(in_f, out_f) for
-                       in_f, out_f in zip(self.enc_size, self.enc_size[:1])]
+                       in_f, out_f in zip(self.enc_size, self.enc_size[1:])]
 
         self.encoding = nn.Sequential(*conv_blocks)
         self.representation = Flatten()
@@ -79,7 +79,7 @@ class ProtonetImageModel(BaseModel):
         self.q = configuration['q']
         self.distance = configuration['distance']
 
-        self.loss_name = ['protonet']
+        self.loss_names = ['protonet']
         self.network_names = ['protonetstandard']
 
         self.netprotonetstandard = ProtoNetStandard(3)
@@ -93,6 +93,7 @@ class ProtonetImageModel(BaseModel):
             self.optimizers = [self.optimizer]
 
         # Store predictions and labels.
+        self.loss_value = []
         self.train_predictions = []
         self.val_predictions = []
         self.train_labels = []
@@ -133,8 +134,10 @@ class ProtonetImageModel(BaseModel):
         self.loss_protonet = self.loss_function(-self.output, self.label)
 
         # temporary, until callbacklist is created.
-        self.train_predictions.append(self.output)
+        self.train_predictions.append((-self.output).softmax(dim=1))
         self.train_labels.append(self.label)
+        loss = self.get_current_losses()
+        self.loss_value.append(loss['protonet'])
 
     def optimize_parameters(self):
         """Perform a backward pass.
@@ -160,8 +163,12 @@ class ProtonetImageModel(BaseModel):
         Arguments:
             epoch {int} -- State of epoch.
         """
-        self.train_predictions = torch.cat(self.train_predictions, dim=0)
-        self.val_predictions = torch.cat(self.val_predictions, dim=0)
+        self.train_predictions = torch.cat(
+            self.train_predictions, dim=0
+        )
+        self.val_predictions = (-1 * torch.cat(
+            self.val_predictions, dim=0
+        )).softmax(dim=1)
         self.train_labels = torch.cat(self.train_labels, dim=0)
         self.val_labels = torch.cat(self.val_labels, dim=0)
 
@@ -172,9 +179,11 @@ class ProtonetImageModel(BaseModel):
             self.val_predictions, self.val_labels
         )
 
+        print(f'Loss: {sum(self.loss_value)/len(self.loss_value)}')
         print(f'Train accuracy: {train_accuracy:.3f}')
         print(f'Validation accuracy: {val_accuracy:.3f}')
 
+        self.loss_value = []
         self.train_predictions = []
         self.val_predictions = []
         self.train_labels = []

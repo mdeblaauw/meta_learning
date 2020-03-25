@@ -13,9 +13,9 @@ class TestMetrics(unittest.TestCase):
             [-1, -10, -20]
         ])
 
-        dummy_input_y = torch.Tensor([2, 2, 0]).long()
+        dummy_input_y = torch.Tensor([1, 2, 0]).long()
 
-        expected_output = 1.0
+        expected_output = 2/3
         output = categorical_accuracy(dummy_input_pred, dummy_input_y)
 
         self.assertEqual(expected_output, output)

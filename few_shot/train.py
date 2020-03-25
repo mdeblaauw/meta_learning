@@ -20,6 +20,8 @@ def train(config_file: Dict):
     model = create_model(config_file['model_params'])
     model.setup()
 
+    model.print_networks()
+
     starting_epoch = config_file['model_params']['load_checkpoint'] + 1
     num_epochs = config_file['model_params']['epochs'] + 1
 

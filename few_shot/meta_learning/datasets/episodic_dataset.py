@@ -1,5 +1,6 @@
 import os
 import logging
+import tarfile
 
 from typing import List, Dict
 from .base_dataset import BaseDataset
@@ -35,9 +36,12 @@ class EpisodicDataset(BaseDataset):
         self.subset = configuration['subset']
         self.preprocess_fn = preprocess_fn
 
-        if preprocess_fn:
-            # do some preprocessing
-            dummy
+        # Check if data is compressed in `tar.gz`.
+        # If so, then uncompress.
+        for name in os.listdir(self.datapath):
+            if name.split('.', 1)[-1] == 'tar.gz':
+                uncompress_data(name, self.datapath)
+                break
 
         self.df = pd.DataFrame(self.index_subset(self.subset, self.datapath))
 
@@ -73,6 +77,20 @@ class EpisodicDataset(BaseDataset):
             int -- Total number of classes.
         """
         return len(self.df['class_name'].unique())
+
+    @staticmethod
+    def uncompress_data(compressed_file_name: str, datapath: str):
+        """Uncompress `tar.gz` data file format.
+
+        Arguments:
+            compressed_file_name {str} -- File name.
+            datapath {str} -- Path to file.
+        """
+        tar = tarfile.open(
+            os.path.join(datapath, compressed_file_name), 'r:gz'
+        )
+        tar.extractall()
+        tar.close()
 
     @staticmethod
     def index_subset(subset: str, datapath: str) -> List[Dict]:

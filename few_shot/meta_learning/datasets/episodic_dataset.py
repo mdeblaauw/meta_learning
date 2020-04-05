@@ -1,4 +1,5 @@
 import os
+import logging
 
 from typing import List, Dict
 from .base_dataset import BaseDataset
@@ -99,7 +100,7 @@ class EpisodicDataset(BaseDataset):
                 Which is subset, class_name and filepath.
         """
         samples = []
-        print(f'Indexing {subset}...')
+        logging.info(f'Indexing {subset}...')
         # Quick first pass to find total for tqdm bar
         subset_len = 0
         for root, folders, files in os.walk(

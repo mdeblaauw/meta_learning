@@ -1,4 +1,5 @@
 import importlib
+import logging
 from typing import Dict
 from meta_learning.models.base_model import BaseModel
 
@@ -14,7 +15,7 @@ def find_model_using_name(model_name: str):
             model = cls
 
     if model is None:
-        print(
+        logging.warning(
             f'''In {model_filename}.py, there should be a subclass of
             BaseModel with class name that matches {target_model_name}
             in lowercase'''
@@ -35,5 +36,5 @@ def create_model(configuration: Dict):
     """
     model = find_model_using_name(configuration['model_name'])
     model_object = model(configuration)
-    print(f'model [{type(model_object).__name__}] was created')
+    logging.info(f'model [{type(model_object).__name__}] was created')
     return model_object

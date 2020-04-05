@@ -1,6 +1,18 @@
+# Mac file system objects
 .DS_Store
+
+# Local data storage
 data/
+
+# Local output storage
+output/
+
+# Python virtual environments
 venv/
+
+# Python files
 .ipynb_checkpoints
 __pycache__/
+
+# IDE settings
 .vscode

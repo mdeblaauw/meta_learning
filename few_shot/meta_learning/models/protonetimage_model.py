@@ -1,3 +1,4 @@
+import logging
 from typing import Tuple, Dict
 from .base_model import BaseModel
 from ..utils import create_nshot_task, pairwise_distances, \
@@ -179,9 +180,9 @@ class ProtonetImageModel(BaseModel):
             self.val_predictions, self.val_labels
         )
 
-        print(f'Loss: {sum(self.loss_value)/len(self.loss_value)}')
-        print(f'Train accuracy: {train_accuracy:.3f}')
-        print(f'Validation accuracy: {val_accuracy:.3f}')
+        logging.info(f'Loss: {sum(self.loss_value)/len(self.loss_value):.3f}')
+        logging.info(f'Train accuracy: {train_accuracy:.3f}')
+        logging.info(f'Validation accuracy: {val_accuracy:.3f}')
 
         self.loss_value = []
         self.train_predictions = []

@@ -1,4 +1,5 @@
 import os
+import logging
 import torch
 from abc import ABC, abstractmethod
 from typing import Tuple, Dict
@@ -127,7 +128,7 @@ class BaseModel(ABC):
 
         # Print new learning rate.
         lr = self.optimizers[0].param_groups[0]['lr']
-        print(f'Learning rate = {lr}')
+        logging.info(f'Learning rate = {lr}')
 
     def save_networks(self, epoch: int):
         """Save all the networks to disk.

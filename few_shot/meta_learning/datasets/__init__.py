@@ -1,4 +1,5 @@
 import importlib
+import logging
 from meta_learning.datasets.base_dataset import BaseDataset
 from meta_learning.datasets.samplers import check_for_sampler, create_sampler
 from typing import Dict
@@ -67,12 +68,12 @@ class CustomDatasetDataLoader():
         self.configuration = configuration
         dataset_class = find_dataset_using_name(configuration['dataset_name'])
         self.dataset = dataset_class(configuration)
-        print(f'Dataset {type(self.dataset).__name__} is created')
+        logging.info(f'Dataset {type(self.dataset).__name__} is created')
 
         # A custom sampler is used if there exist one for the dataset
         if check_for_sampler(configuration['dataset_name']):
             self.sampler = create_sampler(configuration, self.dataset)
-            print(f'Sampler {type(self.sampler).__name__} is created')
+            logging.info(f'Sampler {type(self.sampler).__name__} is created')
 
             self.dataloader = data.DataLoader(
                 self.dataset, **configuration['loader_params'],

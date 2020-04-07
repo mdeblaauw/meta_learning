@@ -40,7 +40,7 @@ class EpisodicDataset(BaseDataset):
         # If so, then uncompress.
         for name in os.listdir(self.datapath):
             if name.split('.', 1)[-1] == 'tar.gz':
-                uncompress_data(name, self.datapath)
+                self.uncompress_data(name, self.datapath)
                 break
 
         self.df = pd.DataFrame(self.index_subset(self.subset, self.datapath))
@@ -89,7 +89,7 @@ class EpisodicDataset(BaseDataset):
         tar = tarfile.open(
             os.path.join(datapath, compressed_file_name), 'r:gz'
         )
-        tar.extractall()
+        tar.extractall(path=datapath)
         tar.close()
 
     @staticmethod

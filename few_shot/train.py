@@ -67,10 +67,10 @@ if __name__ == '__main__':
             'checkpoint_path'] = os.environ['SM_OUTPUT_DATA_DIR']
         configuration_file[
             'train_dataset_params'
-        ]['dataset_path'] = os.environ['SM_CHANNEL_TRAIN']
+        ]['datapath'] = os.environ['SM_CHANNEL_TRAIN']
         configuration_file[
             'val_dataset_params'
-        ]['dataset_path'] = os.environ['SM_CHANNEL_TEST']
+        ]['datapath'] = os.environ['SM_CHANNEL_TEST']
 
     # Setup logger
     logger = duallog.setup(
